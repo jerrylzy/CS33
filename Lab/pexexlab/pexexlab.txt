@@ -1,0 +1,93 @@
+/*
+ * ---------------
+ * |  Pexex Lab  |
+ * |  Jerry Liu  |
+ * ---------------
+ */
+
+/* Gathering Instruction Traces */
+
+Command:
+gdb ~eggert/bin64/bin/emacs-24.5
+I use gdb to examine the behaviors of emacs-24.5
+
+Command:
+(gdb) break Ftimes
+I set a break point at the function Ftimes
+so that each time Ftimes is called,
+I pause the program and examine instructions
+
+Command:
+(gdb) set disassemble-next-line on
+
+I enable the disassemble-next-line to ask the gdb to
+directly print out the current assembly instructions
+after the program encounters a breakpoint.
+
+NOTE: What didn't work for me first:
+
+I tried to find out how to print out the source file & line number
+for a particular instruction.
+
+I tried:
+
+(gdb) disas /m Ftimes
+
+But I didn't find anything
+after the offset of the current location.
+
+And then I found out that the source file and line number are 
+actually printed out before the machine instructions.
+
+Command:
+set logging on
+
+I use this command to automatically record the output
+from gdb to gdb.txt
+
+Command:
+(gdb) r -batch -eval '(print (* 6997 -4398042316799 179))'
+I run the program with correct arguments
+
+Command:
+(gdb) si
+
+I use step into to see every single instructions of
+the function Ftimes and of the functions that call it.
+
+Command:
+info registers $(nameOfRegisters)
+
+I use this to find the values of specific registers.
+
+/* Examine Integer Overflow */
+
+Command:
+gcc -c [additional_flags] testovf.c
+
+I use this command to compile an object file (.o) with additional flags,
+like -O2, -O2 -fwrapv, etc..
+
+Command:
+objdump -d testovf.o > some_name.txt
+
+I use this command to use objdump to dump
+the assembly instructions to a file.
+I didn't use gcc -S
+since it gives a lot of lines starting with a dot.
+That makes it hard to see what's actually going on.
+
+And I checked on gnu.org;
+here is the explanation for -fsanitize=undefined
+
+-fsanitize=undefined
+Enable UndefinedBehaviorSanitizer, a fast undefined behavior detector. Various computations are instrumented to detect undefined behavior at runtime. Current suboptions are:
+
+Then I can understand what this flag means.
+
+What didn't work:
+My assembly dump for the -fsanitize=undefined flag was weird, 
+and then I did a gcc -S -O2 -fsanitize=undefined  and checked the .s file.
+
+I finally figured out how gcc called a function to handle add int overflow.
+

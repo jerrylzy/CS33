@@ -1,0 +1,82 @@
+/*
+ *
+ * answers.txt
+ * Jerry Liu
+ *
+ */
+
+1.
+
+The instruction that causes incorrect result is this instruction:
+
+0x00000000005436af <arith_driver+431>lisp.h:700	lea    0x0(,%rbp,4),%rax
+
+When %rbp = 0xb38e48c71bd31c6f, it causes overflow.
+
+2.
+
+from data.c, we can see that
+
+'most-positive-fixnum' has the value: Vmost_positive_fixnum
+
+and
+
+Vmost_positive_fixnum is defined as the value of MOST_POSITIVE_FIXNUM
+
+from 'lisp.h':
+#define MOST_POSITIVE_FIXNUM (EMACS_INT_MAX >> INTTYPEBITS)
+
+INTTYPEBITS == 2
+
+since we compiled emacs for x86-64,
+EMACS_INT_MAX is defined as LONG_MAX, which is 0x7fffffffffffffff
+
+so if we right shift INT_MAX by 2, we got:
+0x1fffffffffffffff, which is exactly 2305843009213693951
+
+3.
+
+Because in 'data.c'
+if a multiplication overflows,
+the function will mask the result with an INTMASk
+accum = ab & INTMASK;
+
+in 'lisp.h'
+INTMASK is (EMACS_INT_MAX >> (INTTYPEBITS - 1))
+which is 0x3fffffffffffffff
+
+since the multiplication between two most-positive-fixnum will surely overflow,
+
+The result of wrapv method is 0xc000000000000001,
+and and with 0x3fffffffffffffff
+gives us 0x1.
+
+4.
+
+with -fsanitize=undefined
+
+When the program detects an overflow in runtime,
+the program will call a function to handle overflow 
+and print a warning message.
+
+So in this case, gcc will handle the overflow
+and we will get a warning message
+when we try to multiply two most-positive-fixnum
+
+5.
+
+-fwrapv will also give us wrong result
+since wrapv automatically discards bits that exceed the limit of 64 bit.
+Also, people have no idea whether their arithmetic overflowed or not.
+
+6.
+
+If we use -fwrapv, we automatically wraps around using two's complement representation
+when we encounter any signed overflow.
+Thus, there is no need to for the Emacs to check overflow any more.
+From the trace we know that integer overflow check requires a lot of instructions.
+
+7.
+
+If we discard overflow check and use -fwrapv, we will have a lot less instructions.
+Thus, the performance improvement should be pretty significant.

@@ -1,0 +1,92 @@
+/*
+ *
+ * testovf.txt
+ * Jerry Liu
+ *
+ */
+
+/*
+ * -O2
+ */
+
+testovf:
+xorl    %eax, %eax
+ret
+
+/* Description */
+
+I suspect the -O2 method knows that there is an integer overflow
+and that the result should be false.
+So it directly returns 0 without any computation.
+
+/*
+ * -O2 -fsanitize=undefined
+ */
+
+0000000000000000 <testovf>:
+   0:	55                   	push   %rbp
+   1:	53                   	push   %rbx
+   2:	48 ba ff ff ff ff ff 	movabs $0x7fffffffffffffff,%rdx
+   9:	ff ff 7f 
+   c:	48 83 ec 08          	sub    $0x8,%rsp
+  10:	48 8b 1d 00 00 00 00 	mov    0x0(%rip),%rbx        # 17 <testovf+0x17>
+  17:	48 89 dd             	mov    %rbx,%rbp
+  1a:	48 01 d5             	add    %rdx,%rbp
+  1d:	70 0d                	jo     2c <testovf+0x2c>
+  1f:	48 39 eb             	cmp    %rbp,%rbx
+  22:	0f 9f c0             	setg   %al
+  25:	48 83 c4 08          	add    $0x8,%rsp
+  29:	5b                   	pop    %rbx
+  2a:	5d                   	pop    %rbp
+  2b:	c3                   	retq   
+  2c:	48 89 de             	mov    %rbx,%rsi
+  2f:	bf 00 00 00 00       	mov    $0x0,%edi
+  34:	e8 00 00 00 00       	callq  39 <testovf+0x39>
+  39:	eb e4                	jmp    1f <testovf+0x1f>
+
+/* Description */
+
+rdx = long_max
+rbx = long_max
+
+rbp = rdx = long_max
+
+so if rbp += rdx overflows,
+from gcc -S -O2 -fsanitize=undefined
+
+movq    big(%rip), %rbx
+movq    %rbx, %rbp
+addq    %rdx, %rbp
+jo	.L6
+
+.L6:
+.cfi_restore_state
+movq    %rbx, %rsi
+movl    $.Lubsan_data1, %edi
+call    __ubsan_handle_add_overflow
+jmp     .L2
+
+From this we see that gcc will call a function to handle the overflow
+
+If it doesn't overflow, it will skip the instruction at 0x1f,
+and do normal comparisons.
+
+/*
+ * -O2 -fwrapv
+ */
+
+0000000000000000 <testovf>:
+   0:	48 8b 15 00 00 00 00 	mov    0x0(%rip),%rdx        # 7 <testovf+0x7>
+   7:	48 b8 ff ff ff ff ff 	movabs $0x7fffffffffffffff,%rax
+   e:	ff ff 7f 
+  11:	48 01 d0             	add    %rdx,%rax
+  14:	48 39 c2             	cmp    %rax,%rdx
+  17:	0f 9f c0             	setg   %al
+  1a:	c3                   	retq 
+
+/* Description */
+
+As expected, the -fwrapv method does the computation as normal
+and actually comapres the result.
+This is basically a direct translation of the source code.
+So it will have have overflow without any warning.
