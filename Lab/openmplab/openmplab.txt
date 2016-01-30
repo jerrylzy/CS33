@@ -1,0 +1,176 @@
+/*
+ *
+ *       OpenMP Lab
+ *
+ */
+
+1. Downloading source code
+
+I tried to use wget, but the package is always broken.
+
+Thus I switched to Microsoft Remote Desk and downloaded src code.
+
+2. Analyzing bottleneck
+
+Command:
+$ make seq GPROF=1
+
+I used this command to compile a sequential version with GPROF on.
+
+Command:
+$ gprof seq | less
+
+Flat profile:
+
+Each sample counts as 0.01 seconds.
+%   cumulative   self              self     total
+time   seconds   seconds    calls  ms/call  ms/call  name
+61.10      0.36     0.36       15    24.03    25.68  func1
+22.06      0.49     0.13  5177344     0.00     0.00  rand2
+5.09      0.52     0.03        1    30.04   135.49  addSeed
+3.39      0.54     0.02       15     1.34     1.34  func2
+3.39      0.56     0.02                             sequence
+1.70      0.57     0.01   491520     0.00     0.00  findIndexBin
+1.70      0.58     0.01       15     0.67     1.34  func5
+1.70      0.59     0.01        1    10.01    10.01  imdilateDisk
+0.00      0.59     0.00   983042     0.00     0.00  round
+0.00      0.59     0.00       16     0.00     0.00  dilateMatrix
+0.00      0.59     0.00       15     0.00     0.00  func3
+0.00      0.59     0.00       15     0.00     0.00  func4
+0.00      0.59     0.00       15     0.00     0.00  rand1
+0.00      0.59     0.00        2     0.00     0.00  get_time
+0.00      0.59     0.00        1     0.00     0.00  elapsed_time
+0.00      0.59     0.00        1     0.00     0.00  fillMatrix
+0.00      0.59     0.00        1     0.00     0.00  func0
+0.00      0.59     0.00        1     0.00     0.00  getNeighbors
+
+Clearly, the function we should be working on is func1.
+To get more speedup, we should check fun2 and func5.
+
+3. Find out original run time
+
+Command:
+$ make clean
+$ make seq
+$ ./seq
+
+We get the original run time:
+
+FUNC TIME : 0.486457
+TOTAL TIME : 2.676122
+
+Command:
+$ cp func.c func_orig.c
+
+I saved the original func.c file for future use.
+
+4. OpenMP version run time and Speedup
+
+After I modified func1, func2 and func5, I checked the speedup:
+
+Command:
+$ make clean
+$ make omp
+$ ./omp
+
+Then I get the OpenMP run time:
+
+FUNC TIME : 0.033911
+TOTAL TIME : 2.611390
+
+The speedup is:
+S_p = T_1 / T_p
+
+S_32 = T_1 / T_32 = 0.486457 / 0.033911 = 14.35x
+
+The speedup is 14.35x !!!
+
+Note: I noticed that more and more people started to use the server
+so the FUNC TIME and TOTAL TIME are not stable after Monday.
+
+5. Check correctness
+
+Command:
+$ make check
+gcc -o omp  -O3 -fopenmp filter.c main.c func.c util.c -lm
+cp omp filter
+./filter
+FUNC TIME : 0.036094
+TOTAL TIME : 2.215820
+diff --brief correct.txt output.txt
+
+And this outputs nothing. It means I have all correct answers.
+
+6. Check memory leak
+
+This one is nasty, but TA Uen-Tao Wang answered on piazza:
+"As a result, we will likely not be deducting points for memory leaks,
+but I will update this post if that changes."
+
+I tried to firstprivate variables, but it doesn't seem to work
+
+mtrace filter mtrace.out || true
+
+Command:
+$ make omp MTRACE=1
+$ ./omp
+$ make checkmem
+mtrace filter mtrace.out || true
+
+Memory not freed:
+-----------------
+Address     Size     Caller
+0x00000000025ff060   0x1ad0  at 0x7f1b13a117b9
+0x0000000002600b40     0xc0  at 0x7f1b13a117b9
+0x0000000002600c10     0xf8  at 0x7f1b13a11809
+0x0000000002600d10    0x240  at 0x7f1b13f35de5
+0x0000000002600f60    0x240  at 0x7f1b13f35de5
+0x00000000026011b0    0x240  at 0x7f1b13f35de5
+0x0000000002601400    0x240  at 0x7f1b13f35de5
+0x0000000002601650    0x240  at 0x7f1b13f35de5
+0x00000000026018a0    0x240  at 0x7f1b13f35de5
+0x0000000002601af0    0x240  at 0x7f1b13f35de5
+0x0000000002601d40    0x240  at 0x7f1b13f35de5
+0x0000000002601f90    0x240  at 0x7f1b13f35de5
+0x00000000026021e0    0x240  at 0x7f1b13f35de5
+0x0000000002602430    0x240  at 0x7f1b13f35de5
+0x0000000002602680    0x240  at 0x7f1b13f35de5
+0x00000000026028d0    0x240  at 0x7f1b13f35de5
+0x0000000002602b20    0x240  at 0x7f1b13f35de5
+0x0000000002602d70    0x240  at 0x7f1b13f35de5
+0x0000000002602fc0    0x240  at 0x7f1b13f35de5
+0x0000000002603210    0x240  at 0x7f1b13f35de5
+0x0000000002603460    0x240  at 0x7f1b13f35de5
+0x00000000026036b0    0x240  at 0x7f1b13f35de5
+0x0000000002603900    0x240  at 0x7f1b13f35de5
+0x0000000002603b50    0x240  at 0x7f1b13f35de5
+0x0000000002603da0    0x240  at 0x7f1b13f35de5
+0x0000000002603ff0    0x240  at 0x7f1b13f35de5
+0x0000000002604240    0x240  at 0x7f1b13f35de5
+0x0000000002604490    0x240  at 0x7f1b13f35de5
+0x00000000026046e0    0x240  at 0x7f1b13f35de5
+0x0000000002604930    0x240  at 0x7f1b13f35de5
+0x0000000002604b80    0x240  at 0x7f1b13f35de5
+0x0000000002604dd0    0x240  at 0x7f1b13f35de5
+
+Looks like a function at 0x240 has problems;
+it leaks memory for each of the 30 threads.
+However, I found nothing at 0x240 under gdb.
+
+I believe we will find this out.
+
+7. Check Readability
+
+Command:
+$ expand func.c openmplab.txt | awk '/\r/ || 200 < length'
+
+It outputs nothing. So I am fine with readability.
+
+8. What I did:
+I used OpenMP to parallelize loops in all loops in func1, func2 and func5.
+I also hoisted a bunch of stuff out, which should speedup the program a bit further.
+I also limited the threads number to 30, leaving 2 threads to the system and other users.
+Setting threads numbers to 32 will significantly slow down / vary FUNC TIME
+due to possible context switching.
+
+
