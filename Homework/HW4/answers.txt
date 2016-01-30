@@ -1,0 +1,115 @@
+/*
+ *
+ * Homework 4
+ * <Jerry Liu>
+ *
+ */
+
+=========
+| 2. 89 |
+=========
+
+A. true.
+
+From int to double, there is no loss of information
+since double has both greater range and greater precision.
+
+From int to float, the number might be rounded,
+and if so, it will have the same rounding behavior as
+converting the double dx to a float.
+
+B. false.
+
+There is no loss of information to convert ints to doubles.
+However, since the doubles have greater range,
+if x == INT_MIN, and y == 1, then (x - y) will overflow.
+If we assume wrapv behavior, (x - y) will be a positive number.
+
+But (dx - dy) will give the correct result.
+
+C. true.
+
+Although there is no associativity for floating points,
+doubles have much greater range than that of integers.
+
+In other words, even if dx, dy, dz all have INT_MAX / INT_MIN,
+doing additions in this case cannot cause any trouble.
+
+So this is always true.
+
+D. false.
+
+When we do multiplication,
+there is a chance that the required precision
+exceed that of the doubles.
+
+Suppose we set:
+
+x = 2^31 + 1;
+y = 2^31 + 1;
+z = 2^31 + 2^7;
+
+(Note: x, y, z can all be represented by ints)
+Also note doubles can only hold <= 52 fractional bits
+
+then
+
+LHS = [(2^30 + 1) * (2^30 + 1)] * (2^30 + 2^7)
+    = (2^60 + 2^31 + 0 /* 1 round to even */) * (2^30 + 2^7)
+    = 2^90 * (1 + 2^-23 + 2^-29 + (2^-51 + 0 * 2^-52)
+                                  /* 2^-52 + 2^-83 round to even */)
+    = 2^90 * (1 + 2^-23 + 2^-29 + 2^-51)
+
+RHS = (2^30 + 1) * [(2^30 + 1) * (2^30 + 2^7)]
+    = (2^30 + 1) * (2^60 + 2^37 + 2^30 + 0 /* 2^7 round to even */)
+    = 2^90 * (1 + 2^-23 + 2^-29 + 0 /* 2^-53 + 2^-59 round to even */)
+    = 2^90 * (1 + 2^-23 + 2^-29)
+
+LHS != RHS
+
+E. false.
+
+If dx == 0, and dz == 1, then
+
+LHS == NaN
+RHS == 1
+
+LHS != RHS
+
+=========
+| 2. 90 |
+=========
+
+float fpwr2(int x)
+{
+    unsigned exp, frac;
+    unsigned u;
+
+    if (x < -149)
+    {
+        /* Too small. Return 0.0 */
+        exp = 0;
+        frac = 0;
+    }
+    else if (x < -126)
+    {
+        /* Denormalized result */
+        exp = 0;
+        frac = 1 << (x + 149);  /* 23 - (-x - 127) - 1 */
+    }
+    else if (x < 128)
+    {
+        /* Normalized result */
+        exp = x + 127;          /* bias = 2^7 - 1 = 127 */
+        frac = 0;
+    }
+    else
+    {
+        /* Too big.  Return +oo */
+        exp = 255;
+        frac = 0;
+    }
+
+    u = exp << 23 | frac;
+    return u2f(u);
+}
