@@ -1,0 +1,103 @@
+2.64:
+
+int any_odd_one(unsigned x)
+{
+    return !!(x & 0xaaaaaaaa);
+}
+
+2.71:
+
+A.
+
+Since packed_t is defined as unsigned,
+all other signed ints will be implicitly converted to unsigned,
+and thus the result returned is an unsigned integer.
+
+Also when performing the right shift on the unsigned int,
+the signed bit is not preserved.
+
+B.
+
+typedef unsigned packed_t;
+
+int xbyte(packed_t word, int bytenum)
+{
+    return ((int) word) << ((3 - bytenum) << 3) >> 24;
+}
+
+2.72:
+A.
+
+Since the sizeof() function returns size_t, which is unsigned,
+in an operation with unsigned, signed ints will be implicitly converted to unsigned.
+Here we have two conditions:
+
+maxbytes - sizeof(val) >= 0, this is perfectly fine
+maxbytes - sizeof(val) < 0, instead of having a negative number,
+                             the difference is always a positive number.
+                             Thus this condition is always true.
+
+B.
+
+we can rewrite the condition test to be:
+
+maxbytes >= 0 && maxbytes >= sizeof(val)
+
+2.81:
+
+A. False
+int x = INT_MIN;
+int y = 1;
+
+LHS: x < y == true
+RHS: -x > -y == x > -y == INT_MIN > -1 == false
+              ^
+              |
+since the negation of INT_MIN is itself in the wrapv camp
+
+LHS != RHS
+
+B. True
+
+LHS = (x + y) << 4 + y - x
+RHS = 17 * y + 15 * x = (2^4+2^0)y + (2^4-2^0)x
+                      = 2^4(x + y) + 2^0 * y - 2^0 * x
+                      = (x + y) << 4 + y - x
+
+LHS == RHS
+
+C. True
+
+LHS: ~x + ~y + 1 = (-1 - x) + (-1 - y) + 1= -1 - x - y
+RHS: ~(x + y) = -1 - (x + y) = -1 - x - y
+
+LHS == RHS
+
+D. True
+
+Since the negation of an unsigned number is defined as follows:
+unsigned i = some value;
+
+-i = i          when i = 0
+i = 2^32 - i    when i > 0
+
+LHS: ux - uy = ux + (-uy) = ux + 2^32 - uy
+RHS: -(unsigned)(y - x) = 2^32 - (unsigned)(y - x) = 2^32 - (uy - ux)
+                                                   = 2^32 + ux - uy
+
+Note:
+(unsigned)(y - x) == (uy - ux) since the bits inside doesn't change
+
+LHS == RHS
+
+E. True
+
+Consider x as a bit vector { x_31, x_30, ..., x_2, x_1, x_0 }
+When we perform right shift by 2, the last 2 bits are dropped
+
+so x' = x >> 2 = { x_31, x_31, x_31, x_30, ..., x_2 }
+
+Then when we do left shift by 2, we simply add 0's after element x_2
+so x'' = x' << 2 = {x_31, x_30, ..., x_2, 0, 0 }
+
+Clearly x'' <= x since 0 <= x_1 and 0 <= x_0
