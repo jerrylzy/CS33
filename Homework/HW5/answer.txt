@@ -1,0 +1,35 @@
+/*
+ * Homework 5
+ *
+ */
+
+12.18:
+A.  H_2, L_2, U_2, H_1, L_1, S_2, U_1, S_1, T_1, T_2
+Unsafe.
+
+B.  H_2, H_1, L_1, U_1, S_1, L_2, T_1, U_2, S_2, T_2
+Safe.
+
+C.  H_1, L_1, H_2, L_2, U_2, S_2, U_1, S_1, T_1, T_2
+Unsafe.
+
+12.24:
+The functions are implicitly reentrant or implicitly non-reentrant.
+
+The functions of RIO are thread-safe,
+but they are not explicitly reentrant.
+
+Since all the RIO functions take pointer in the arguments,
+we can divide into two situations:
+
+a. The caller is careful and does not pass the address of shared data
+    (either global, static or shared via pointers to stack),
+    then the functions are implicitly reentrant.
+
+b. The caller is not careful and passes the address of shared data
+    as the pointer argument,
+    then the functions are implicitly non-reentrant.
+
+If we look at Figure 10.5, the caller does not pass any shared data.
+Thus in this case, functions in the RIO package are implicitly reentrant.
+
