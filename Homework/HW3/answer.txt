@@ -1,0 +1,96 @@
+
+3.67
+A.
+
+High Address
+|             |       <- rsp + 104
+|             |       <- rsp + 96
+|             |       <- rsp + 88
+|             |       <- rsp + 80
+|             |       <- rsp + 72
+|             |       <- rsp + 64, rdi
+|             |
+|             |
+|             |
+|             |       <- rsp + 32
+|      z      |       <- rsp + 24, rax
+|  s.p   = &z |       <- rsp + 16
+| s.a[1] = y  |       <- rsp + 8
+| s.a[0] = x  |       <- rsp
+Low Address
+
+B.
+
+The function eval pass the value of the address (rsp + 64)
+to the function process. This address is actually
+the start of strB r in function process.
+
+C.
+Since after call, the value of the stack pointer rsp is subtracted by 8
+to store return address.
+So the function process access the elements in s by:
+
+s.a[0]: rsp + 8
+s.a[1]: rsp + 16
+s.p:    rsp + 24
+
+D.
+
+The function process sets the fields of result struct r by:
+
+rdi == rax: y
+rdi + 8:    x
+rdi + 16:   z
+
+E.
+
+High Address
+|             |       <- rsp + 104
+|             |       <- rsp + 96
+|             |       <- rsp + 88
+| r.q    = z  |       <- rsp + 80
+| r.u[1] = x  |       <- rsp + 72
+| r.u[0] = y  |       <- rsp + 64, rdi, rax
+|             |
+|             |
+|             |
+|             |       <- rsp + 32
+|      z      |       <- rsp + 24, rax
+| s.p    = &z |       <- rsp + 16
+| s.a[1] = y  |       <- rsp + 8
+| s.a[0] = x  |       <- rsp
+Low Address
+
+The function eval access the elements in r by:
+
+r.u[0]: rsp + 64
+r.u[1]: rsp + 72
+r.q:    rsp + 80
+
+F.
+
+Structures passed as function arguments are in the form of addresses
+Structures returned as function results are also in the form addresses.
+
+3.70
+
+A.
+
+offsets:
+e1.p    == 0
+e1.y    == 8
+e2.x    == 0
+e2.next == 8
+
+B.
+
+e1 requires 16 bytes
+e2 requires 16 bytes
+
+C.
+
+void proc(union ele* up)
+{
+    up->e2.x = *(up->e2.next->e1.p) - up->e2.next->e1.y;
+}
+
