@@ -5,6 +5,7 @@ Quarter | Instructor
 Fall 2015 | Paul Eggert
 
 [Course website](http://web.cs.ucla.edu/classes/fall15/cs33/)
+
 This repository includes my class work and TA's helpful discussion slides
 
 Last updated: 1/26/2017
