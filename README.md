@@ -14,10 +14,10 @@ Last updated: 1/26/2017
 Homework # | Answer
 ---------- | ------
 Homework 1 | [HW1](https://github.com/jerrylzy/CS33/tree/master/Homework/HW1)
-Homework 2 | [HW1](https://github.com/jerrylzy/CS33/tree/master/Homework/HW2)
-Homework 3 | [HW1](https://github.com/jerrylzy/CS33/tree/master/Homework/HW3)
-Homework 4 | [HW1](https://github.com/jerrylzy/CS33/tree/master/Homework/HW4)
-Homework 5 | [HW1](https://github.com/jerrylzy/CS33/tree/master/Homework/HW5)
+Homework 2 | [HW2](https://github.com/jerrylzy/CS33/tree/master/Homework/HW2)
+Homework 3 | [HW3](https://github.com/jerrylzy/CS33/tree/master/Homework/HW3)
+Homework 4 | [HW4](https://github.com/jerrylzy/CS33/tree/master/Homework/HW4)
+Homework 5 | [HW5](https://github.com/jerrylzy/CS33/tree/master/Homework/HW5)
 
 ## Lab Implementation
 Lab Specification | Lab Implementation
