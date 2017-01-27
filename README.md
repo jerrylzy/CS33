@@ -22,7 +22,7 @@ Homework 5 | [HW1](https://github.com/jerrylzy/CS33/tree/master/Homework/HW5)
 ## Lab Implementation
 Lab Specification | Lab Implementation
 ----------------- | ------------------
-[Lab 1: Data Lab](http://web.cs.ucla.edu/classes/winter17/cs111/assign/lab1.html) | [Lab 1](https://github.com/jerrylzy/CS33/tree/master/Lab/datalab)
+[Lab 1: Data Lab](https://github.com/jerrylzy/CS33/blob/master/Lab/datalab/README) | [Lab 1](https://github.com/jerrylzy/CS33/tree/master/Lab/datalab)
 [Lab 2: Program Execution Explorer Lab](http://web.cs.ucla.edu/classes/fall15/cs33/lab/pexexlab.html) | [Lab 2](https://github.com/jerrylzy/CS33/tree/master/Lab/pexexlab) 
 [Lab 3: Smashing Lab](http://web.cs.ucla.edu/classes/fall15/cs33/lab/smashinglab.html) | [Lab 3](https://github.com/jerrylzy/CS33/tree/master/Lab/smashinglab) 
 [Lab 4: OpenMP Lab](http://web.cs.ucla.edu/classes/fall15/cs33/lab/openmplab.html) | [Lab 4](https://github.com/jerrylzy/CS33/tree/master/Lab/openmplab)
